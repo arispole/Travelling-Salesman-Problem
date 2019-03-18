@@ -1,36 +1,36 @@
-import java.util.Arrays;
-import java.util.Collections;
-
 public class Individual {
 	
 	private int[] cromosome;
-	private int fitness;
-	private int reproduction;
+	private double fitness;
+	private double reproduction;
 
-	public Individual(int[] trace) {								
-		cromosome = trace;
-		Collections.shuffle(Arrays.asList(cromosome));
-		fitness = 0;
-		reproduction = 0;
+	public Individual(int cities) {								
+		cromosome = new int[cities];
+		fitness = 0.0;
+		reproduction = 0.0;
 	}
 
 	public int[] getCromosome() {
 		return cromosome;
 	}
+	
+	public void setCromosome(int[] cromosome) {
+		this.cromosome = cromosome.clone();
+	}
 
-	public int getFitness() {
+	public double getFitness() {
 		return fitness;
 	}
 
-	public void setFitness(int fitness) {
+	public void setFitness(double fitness) {
 		this.fitness = fitness;
 	}
 
-	public int getReproduction() {
+	public double getReproduction() {
 		return reproduction;
 	}
 
-	public void setReproduction(int reproduction) {
+	public void setReproduction(double reproduction) {
 		this.reproduction = reproduction;
 	}
 
