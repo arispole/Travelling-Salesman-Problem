@@ -1,37 +1,41 @@
-import java.util.Arrays;
-import java.util.Collections;
-
 public class Individual {
 	
 	private int[] cromosome;
-	private int fitness;
-	private int reproduction;
+	private long pathCost;
+	private double reproduction;
 
-	public Individual(int[] trace) {								
-		cromosome = trace;
-		Collections.shuffle(Arrays.asList(cromosome));
-		fitness = 0;
-		reproduction = 0;
+	public Individual(int cities) {								
+		cromosome = new int[cities];
+		pathCost = Long.MAX_VALUE;
+		reproduction = 0.0;
 	}
 
 	public int[] getCromosome() {
 		return cromosome;
 	}
-
-	public int getFitness() {
-		return fitness;
+	
+	public void setCromosome(int[] cromosome) {
+		this.cromosome = cromosome.clone();
 	}
 
-	public void setFitness(int fitness) {
-		this.fitness = fitness;
+	public long getPathCost() {
+		return pathCost;
 	}
 
-	public int getReproduction() {
+	public void setPathCost(long pathCost) {
+		this.pathCost = pathCost;
+	}
+
+	public double getReproduction() {
 		return reproduction;
 	}
 
-	public void setReproduction(int reproduction) {
+	public void setReproduction(double reproduction) {
 		this.reproduction = reproduction;
+	}
+	
+	public void setGene(int value, int index) {
+		cromosome[index] = value;
 	}
 
 }
