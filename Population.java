@@ -5,54 +5,52 @@ public class Population {
 	
 	protected List<Individual> l;
 	protected long numpop;
-	protected long survivors;
-	protected double highestFitness;
-	protected double averageFitness;
+	protected long lowestPathCost;
+	protected long averagePathCost;
 
 	public Population() {					
 		l = new ArrayList<Individual>();
 		numpop = 0;
 	}
 	
-	public double getHighestFitness() {
-		return highestFitness;
+	public long getLowestPathCost() {
+		return lowestPathCost;
 	}
 
-	public double getAverageFitness() {
-		return averageFitness;
-	}
-	
-	public long getSurvivors() {
-		return survivors;
+	public long getAveragePathCost() {
+		return averagePathCost;
 	}
 	
 	public long getNumpop() {
 		return numpop;
 	}
+	
+	public List<Individual> getList() {
+		return l;
+	}
 
-	public void valid(int[][] matrix, int cities) {						//discards bad individuals and assigns the fitness
+	public void valid(int[][] matrix, int cities) {						//discards bad individuals and assigns the path cost
 		
 		int[] v;
 		int r, c;
-		int fitness = 0;
+		long pathCost = 0;
 		boolean valid;
 		int i = 0;
 		int end = l.size();
-		survivors = numpop;
 		
 		while (i < end) {
 			
 			valid = true;
-			fitness = 0;
+			pathCost = 0;
 			v = l.get(i).getCromosome();
 			
 			c = v[0];
 			if (matrix[0][c] == 0) valid = false;
-			else fitness += matrix[0][c];
+			else pathCost += matrix[0][c];
 			
 			c = v[cities-1];
 			if (matrix[0][c] == 0) valid = false;
-			else fitness += matrix[0][c];
+			else pathCost += matrix[0][c];
 			
 			if (valid) {
 			
@@ -66,20 +64,20 @@ public class Population {
 						break;
 					}
 					
-					else fitness += matrix[r][c];
+					else pathCost += matrix[r][c];
 				}
 				
 			}
 
 			if (valid) {
-				l.get(i).setFitness(1/(double)fitness);
+				l.get(i).setPathCost(pathCost);
 				i++;
 			}
 			
 			else {
 				l.remove(i);
 				end--;
-				survivors--;
+				numpop--;
 			}
 		}
 		
@@ -87,50 +85,69 @@ public class Population {
 			System.out.println("THE POPULATION HAS BECOME EXTINT");
 			System.exit(0);
 		}
-		
 	}
 
 	public void setProb(int[][] matrix) {								//probability of reproduction
 		
-		double totalFitness = 0.0;
+		long totalPathCost = 0;
+		long maxCost, minCost;
 		double reproduction = 0.0;
 		double prec = 0.0;
-		double temp = 0.0;
-		averageFitness = 0.0;
-		highestFitness = 0.0;
+		long currentCost = 0;
+		double averageCost = 0.0;
 		
 		for (int i = 0; i < l.size(); i++) {
-			totalFitness += l.get(i).getFitness();
+			totalPathCost += l.get(i).getPathCost();
 		}
 		
+		averageCost = totalPathCost / l.size();
+		maxCost = worstIndividualP().getPathCost();
+		minCost = bestIndividualP().getPathCost();
+		
 		for (int j = 0; j < l.size(); j++) {
-			temp = l.get(j).getFitness();
-			averageFitness += temp;
-			if (temp > highestFitness) highestFitness = temp;
-			reproduction = temp / totalFitness;
+			currentCost = l.get(j).getPathCost();
+			reproduction = (1/(double)numpop) * (1 + coeff * ((averageCost - (double)currentCost)/(double)(maxCost - minCost)));
 			reproduction += prec;
 			l.get(j).setReproduction(reproduction);
 			prec = reproduction;
 		}
 		
-		averageFitness = averageFitness / l.size();
+		l.get(l.size()-1).setReproduction(1.0);
+		
+		averagePathCost = (long) (averageCost);
+		lowestPathCost = minCost;
 	}
 
-	public Individual comparison(Individual bestIndividual) {			//keeps track of the best solution
+	public Individual bestIndividualP() {
 		
+		Individual bestIndividual = l.get(0);
 		Individual temp;
 		
 		for (int i = 0; i < l.size(); i++) {
 			
 			temp = l.get(i);
 			
-			if (temp.getFitness() > bestIndividual.getFitness()) {
-				bestIndividual = temp;
-			}
+			if (temp.getPathCost() < bestIndividual.getPathCost()) bestIndividual = temp;
 			
 		}
 		
 		return bestIndividual;
+	}
+	
+	public Individual worstIndividualP() {
+		
+		Individual worstIndividual = l.get(0);
+		Individual temp;
+		
+		for (int i = 0; i < l.size(); i++) {
+			
+			temp = l.get(i);
+			
+			if (temp.getPathCost() > worstIndividual.getPathCost()) worstIndividual = temp;
+			
+		}
+		
+		return worstIndividual;
 	}
 	
 	public void addIndividuals(List<Individual> childs) {				//adds child to the new population
@@ -145,14 +162,14 @@ public class Population {
 	public List<Individual> pairing() {											//chooses two parents based on their probability of reproduction
 		
 		List<Individual> parents = new ArrayList<Individual>();
-		double temp;
+		double rand;
 		int i;
 		
 		for (int j = 0; j < 2; j++) {
-			temp = Math.random();
+			rand = Math.random();
 			i = 0;
 		
-			while (temp > l.get(i).getReproduction()) {
+			while (rand > l.get(i).getReproduction()) {
 				i++;
 			}
 		
@@ -248,30 +265,30 @@ public class Population {
 
 	public List<Individual> elite(List<Individual> parents, List<Individual> childs, double eliprob) {			//exchange the best parent with the worst child 
 		
-		Individual bestParent;
-		int worstChild;
+		Individual bestParent, worstChild;
 		
-		if (parents.get(0).getFitness() < parents.get(1).getFitness()) bestParent = parents.get(1);
+		int indexWorstChild;
+		
+		if (parents.get(0).getPathCost() > parents.get(1).getPathCost()) bestParent = parents.get(1);
 
 		else bestParent = parents.get(0);
 
 		
-		if (childs.get(0).getFitness() < childs.get(1).getFitness()) worstChild = 0;
+		if (childs.get(0).getPathCost() > childs.get(1).getPathCost()) {
+			worstChild = childs.get(0);
+			indexWorstChild = 0;
+		}
 	
-		else worstChild = 1;
+		else {
+			worstChild = childs.get(1);
+			indexWorstChild = 1;
+		}
 		
 		double random = Math.random();
 		
-		if (random < eliprob) {
-			childs.remove(worstChild);
-			childs.add(bestParent);
-		}
+		if ((bestParent.getPathCost() < worstChild.getPathCost()) && random < eliprob) childs.set(indexWorstChild,bestParent);
 		
 		return childs;
-	}
-	
-	public List<Individual> getList() {
-		return l;
 	}
 
 }

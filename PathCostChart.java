@@ -5,16 +5,16 @@ import org.jfree.ui.ApplicationFrame;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.DefaultCategoryDataset;
 	
-public class FitnessChart extends ApplicationFrame {
+public class PathCostChart extends ApplicationFrame {
 	
 	protected DefaultCategoryDataset dataset = new DefaultCategoryDataset( );
 
-	public FitnessChart(String applicationTitle, String chartTitle) {
+	public PathCostChart(String applicationTitle, String chartTitle) {
 		
 		super(applicationTitle);
 		JFreeChart lineChart = ChartFactory.createLineChart(chartTitle, 
 				"Generations",
-				"Fitness",
+				"Path Cost",
 				dataset,
 				PlotOrientation.VERTICAL,
 				true,true,false);
@@ -25,7 +25,7 @@ public class FitnessChart extends ApplicationFrame {
 		      
 	}
 	
-	public void addToDataset(double fitness, String type, int generation) {
-		dataset.addValue(fitness, type, Integer.toString(generation));
+	public void addToDataset(long pathCost, String type, int generation) {
+		dataset.addValue(pathCost, type, Integer.toString(generation));
 	}
 }

@@ -1,12 +1,12 @@
 public class Individual {
 	
 	private int[] cromosome;
-	private double fitness;
+	private long pathCost;
 	private double reproduction;
 
 	public Individual(int cities) {								
 		cromosome = new int[cities];
-		fitness = 0.0;
+		pathCost = Long.MAX_VALUE;
 		reproduction = 0.0;
 	}
 
@@ -18,12 +18,12 @@ public class Individual {
 		this.cromosome = cromosome.clone();
 	}
 
-	public double getFitness() {
-		return fitness;
+	public long getPathCost() {
+		return pathCost;
 	}
 
-	public void setFitness(double fitness) {
-		this.fitness = fitness;
+	public void setPathCost(long pathCost) {
+		this.pathCost = pathCost;
 	}
 
 	public double getReproduction() {
@@ -32,6 +32,10 @@ public class Individual {
 
 	public void setReproduction(double reproduction) {
 		this.reproduction = reproduction;
+	}
+	
+	public void setGene(int value, int index) {
+		cromosome[index] = value;
 	}
 
 }

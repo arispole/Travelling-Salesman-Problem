@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.jfree.ui.RefineryUtilities;
+
 public class TSP {
 	
 	public static int cities;
@@ -13,32 +15,35 @@ public class TSP {
 
 	public static void main(String[] args) throws IOException {
 		
-		long numpop, numgen;
-		double incrate,mutprob, numchild, eliprob;
+		long numpop, numgen, numchild;
+		double incrate, mutprob, eliprob;
 		readMatrix(); 																																	 
-		numpop = 1000;
-		numgen = 100;
-		numchild = 0.0;
-		incrate = 0.0;
-		mutprob = 0.1;
-		eliprob = 0.1;
+		numpop = 300;							// Population number
+		numgen = 300;							// Generation number
+		incrate = 0.005;						// Increase rate of the population
+		mutprob = 0.001;						// Probability of mutation
+		eliprob = 0.001;						// Probability of parent survival 
+		double coeff = 2;						// Probability Distribution Coefficient [Range 0 to 2]
+		numchild = numpop;
 		List<Individual> p, c;
 		
 		Population solutions = new FirstPopulation(cities, numpop);								
 		Individual bestIndividual = new Individual(cities);
-		FitnessChart fitChart = new FitnessChart( "Highest Fitness vs Average Fitness" , "");
+		PathCostChart pathChart = new PathCostChart( "Lowest Path Cost vs Average Path Cost" , "");
 		PopulationChart popChart = new PopulationChart("Evolution of population", "");
 		
 		for (int i = 0; i < numgen; i++) {
 			
-			solutions.valid(matrix, cities);													
-			popChart.addToDataset(solutions.getSurvivors(), "Population", i);					
-			bestIndividual = solutions.comparison(bestIndividual);								
-			solutions.setProb(matrix);															
-			fitChart.addToDataset(solutions.getAverageFitness(), "Average Fitness", i);
-			fitChart.addToDataset(solutions.getHighestFitness(), "Highest Fitness", i);
+			System.out.println("Generation n° " + i);
+			solutions.valid(matrix, cities);				
+			System.out.println("Population number: " + solutions.getNumpop());
+			popChart.addToDataset(solutions.getNumpop(), "Population", i);					
+			if (solutions.bestIndividualP().getPathCost() < bestIndividual.getPathCost()) bestIndividual = solutions.bestIndividualP();								
+			solutions.setProb(coeff);															
+			pathChart.addToDataset(solutions.getAveragePathCost(), "Average Path Cost", i);
+			pathChart.addToDataset(solutions.getLowestPathCost(), "Lowest Path Cost", i);
 			Population solutions2 = new Population();
-			numchild = solutions.getNumpop() * (1 + incrate);
+			numchild = (long) (numchild * (1 + incrate));
 			
 			for (int j = 0; j < (int)numchild/2; j++) {
 				
@@ -52,26 +57,26 @@ public class TSP {
 			
 			solutions = solutions2;
 			
-			System.out.println("Generation " + i);
 		}
 		
 		System.out.println("");
 		System.out.println("BEST PATH:");
+		System.out.println("0");
 		int[] bestcromosome = bestIndividual.getCromosome();
 		for (int i = 0; i < bestcromosome.length; i++) {
 			System.out.println(bestcromosome[i]);
 		}
+		System.out.println("0");
 		System.out.println("");
-		System.out.print("COST:");
-		System.out.println((int)(1/bestIndividual.getFitness()));
+		System.out.println("PATH COST: " + bestIndividual.getPathCost());
 	
-		fitChart.pack( );
-		RefineryUtilities.positionFrameOnScreen(fitChart, 0.5 , 0.19);
-		fitChart.setVisible( true );
+		pathChart.pack( );
+		RefineryUtilities.positionFrameOnScreen(pathChart, 0.5 , 0.5);
+		pathChart.setVisible( true );
 		
 		popChart.pack( );
-		RefineryUtilities.positionFrameOnScreen(popChart, 0.5 , 0.81);
-		popChart.setVisible( true );
+		RefineryUtilities.positionFrameOnScreen(popChart, 0.5 , 0.9);
+//		popChart.setVisible( true );
 	}
 	
 	public static void readMatrix() throws IOException {															//reads the graph matrix from a file
